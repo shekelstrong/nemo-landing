@@ -1,301 +1,714 @@
-import { useState } from "react";
-import {
-  Shield, Zap, Smartphone, Globe, ChevronDown, ChevronUp,
-  Mail, CreditCard, Send, ExternalLink, Terminal, Lock,
-  Monitor, Apple, Smartphone as Android, Server
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import Head from "next/head";
 
-/* ───── helpers ───── */
-function Accordion({ title, children }) {
-  const [open, setOpen] = useState(false);
+/* ───── Accordion ───── */
+function Accordion({ title, children, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="border border-zinc-800 rounded-lg overflow-hidden">
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-zinc-800/50 transition"
-      >
-        <span className="font-medium">{title}</span>
-        {open ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+    <div className="border-b border-border">
+      <button onClick={() => setOpen(!open)} className="accordion-trigger">
+        <span className="flex items-baseline gap-4">
+          <span className="text-xs font-mono text-primary tabular-nums">{title.num}</span>
+          {title.text}
+        </span>
+        <span className={`text-primary transition-transform ${open ? "rotate-180" : ""}`}>▾</span>
       </button>
-      {open && <div className="px-5 pb-5 text-zinc-400 leading-relaxed">{children}</div>}
+      {open && <div className="accordion-content">{children}</div>}
     </div>
   );
 }
 
+/* ───── CopyBlock ───── */
 function CopyBlock({ text }) {
   const [copied, setCopied] = useState(false);
   const copy = () => { navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); };
   return (
-    <div className="relative bg-zinc-900 rounded p-3 mt-2 text-sm font-mono text-green-400 border border-zinc-700">
-      <button onClick={copy} className="absolute top-2 right-2 text-xs text-zinc-500 hover:text-zinc-300">Копировать</button>
-      <pre className="whitespace-pre-wrap pr-20">{text}</pre>
-      {copied && <span className="absolute top-2 right-20 text-xs text-blue-400">Скопировано!</span>}
+    <div className="relative bg-background border border-border p-3 mt-3 text-sm font-mono text-primary">
+      <button onClick={copy} className="absolute top-2 right-2 text-xs text-muted-foreground hover:text-primary transition">Копировать</button>
+      <pre className="whitespace-pre-wrap pr-24">{text}</pre>
+      {copied && <span className="absolute top-2 right-28 text-xs text-primary">Скопировано!</span>}
     </div>
   );
 }
 
-/* ───── data ───── */
-const plans = [
-  { name: "Basic", price: "500 ₽", period: "/мес", traffic: "50 ГБ", devices: "2 устройства" },
-  { name: "Pro", price: "900 ₽", period: "/мес", traffic: "150 ГБ", devices: "5 устройств", popular: true },
-  { name: "Ultimate", price: "1 500 ₽", period: "/мес", traffic: "Безлимит", devices: "10 устройств" },
+/* ───── DATA ───── */
+
+// Тарифы из vpn_bot/config.py: базовая цена 100₽/мес, VIP 300₽/мес
+// Скидки: 3м=10%, 6м=17%, 12м=25%
+// Скидка 50% для мигрантов с другого VPN
+const standardTiers = [
+  { months: 1, label: "1 месяц", price: 100, monthly: 100 },
+  { months: 3, label: "3 месяца", price: 270, monthly: 90, discount: "10%", highlight: false },
+  { months: 6, label: "6 месяцев", price: 498, monthly: 83, discount: "17%", highlight: true },
+  { months: 12, label: "1 год", price: 900, monthly: 75, discount: "25%", highlight: false },
 ];
 
-const features = [
-  { icon: Shield, title: "Обход РКН", desc: "Доступ к заблокированным ресурсам без ограничений" },
-  { icon: Zap, title: "Авто-маршрутизация", desc: "Российские сайты работают напрямую, заблокированные — через VPN" },
-  { icon: Smartphone, title: "iOS Per-App VPN", desc: "VPN только для выбранных приложений" },
-  { icon: Globe, title: "Резидентские IP", desc: "Чистые IP-адреса, не детектируемые как VPN" },
+const premiumTiers = [
+  { months: 1, label: "1 месяц", price: 300, monthly: 300 },
+  { months: 3, label: "3 месяца", price: 810, monthly: 270, discount: "10%" },
+  { months: 6, label: "6 месяцев", price: 1494, monthly: 249, discount: "17%" },
+  { months: 12, label: "1 год", price: 2700, monthly: 225, discount: "25%" },
 ];
 
-const instructions = [
-  {
-    icon: Apple, title: "iOS / iPadOS",
-    content: (
-      <>
-        <p>Автоматическое переключение VPN для российских и заблокированных сервисов.</p>
-        <CopyBlock text="Скачать Streisand из TestFlight → Открыть ссылку-ключ → Готово" />
-        <p className="mt-3 text-xs text-zinc-500">Видео-инструкция скоро будет доступна</p>
-        <div className="mt-2 bg-zinc-800 rounded-lg h-48 flex items-center justify-center text-zinc-600 text-sm">
-          <Monitor size={32} className="mr-2" /> Видео-заглушка
-        </div>
-        <p className="mt-3 font-medium text-zinc-300">Per-App VPN настройка:</p>
-        <p className="text-sm">Настройки → VPN → Streisand → (i) → «Использовать VPN для» → выберите приложения</p>
-      </>
-    ),
-  },
-  {
-    icon: Android, title: "Android",
-    content: (
-      <>
-        <p>VLESS Reality + автоматическая маршрутизация через v2rayNG или NekoBox.</p>
-        <CopyBlock text="Скачать v2rayNG → Скопировать ссылку-ключ → Импорт из буфера → Подключиться" />
-      </>
-    ),
-  },
-  {
-    icon: Monitor, title: "macOS / Windows",
-    content: (
-      <>
-        <p>Используйте клиент v2rayN (Windows) или Streisand/FoXray (macOS).</p>
-        <CopyBlock text="Скопировать ссылку-ключ → Импорт → Подключиться" />
-      </>
-    ),
-  },
-  {
-    icon: Server, title: "Linux",
-    content: (
-      <>
-        <p>Настройка через xray-core с конфигурационным файлом.</p>
-        <CopyBlock text={`xray run -c /etc/xray/config.json\n# Конфиг будет отправлен на ваш email`} />
-      </>
-    ),
-  },
+const logLines = [
+  "[SYSTEM] INITIALIZING VLESS-REALITY...",
+  "[AUTH] HANDSHAKE → 200 OK",
+  "[TUNNEL] BYPASSING DPI... DONE",
+  "[ROUTE] WHITELIST_BREAK = TRUE",
+  "[NODE] AMSTERDAM_02 // 12ms",
+  "[STEALTH] MODE: ACTIVE",
 ];
 
-const faqData = [
-  { cat: "Общие", items: [
-    { q: "Что такое VLESS Reality?", a: "Современный протокол VPN, который маскирует трафик под обычный HTTPS. РКН не может его обнаружить и заблокировать." },
-    { q: "Какие устройства поддерживаются?", a: "iOS, Android, macOS, Windows, Linux. До 10 устройств одновременно на тарифе Ultimate." },
-  ]},
-  { cat: "Оплата", items: [
-    { q: "Как оплатить подписку?", a: "Через Telegram-бот. Выбираете тариф, оплачиваете картой или криптовалютой, ключи приходят на email." },
-    { q: "Есть ли возврат?", a: "Да, в течение 24 часов с момента покупки, если не использовали более 1 ГБ трафика." },
-  ]},
-  { cat: "Настройка", items: [
-    { q: "Сложно ли настроить?", a: "Нет — достаточно скопировать одну ссылку-ключ в приложение. На iOS работает автоматически через Streisand." },
-  ]},
-  { cat: "Технические", items: [
-    { q: "Логируется ли трафик?", a: "Нет. Мы не храним логи подключений. Ваша приватность — наш приоритет." },
-    { q: "Какая скорость?", a: "Ограничена только вашим тарифом. Протокол VLESS Reality даёт минимальные задержки." },
-  ]},
+const guides = [
+  { tag: "iOS", title: "Streisand + Per-App VPN автоматизация", duration: "06:24", type: "ВИДЕО" },
+  { tag: "Android", title: "v2rayNG: импорт ключа за 60 секунд", duration: "03:12", type: "ВИДЕО" },
+  { tag: "macOS", title: "FoXray и системный routing", duration: "08:40", type: "ВИДЕО" },
+  { tag: "Windows", title: "Hiddify Next: TUN-режим", duration: "05:15", type: "ВИДЕО" },
+  { tag: "iOS PRO", title: "Per-App VPN: авто on/off по приложениям", duration: "10 шагов", type: "ДОКУМЕНТ" },
+  { tag: "Router", title: "Keenetic / OpenWRT через Xray", duration: "12 страниц", type: "PDF" },
 ];
 
-/* ───── page ───── */
+const faqs = [
+  { q: "Это законно?", a: "Использование VPN в России законно для физических лиц. Запрещена только публичная реклама обхода блокировок и использование VPN для доступа к экстремистскому контенту. NEMO не хранит логи и не несёт ответственности за то, к каким ресурсам вы подключаетесь." },
+  { q: "Что приходит на email после оплаты?", a: "Два артефакта: (1) subscription URL — ссылка на персональный конфиг, которая автоматически подхватывает новые сервера, и (2) routing-ключ для VLESS/Reality, который импортируется в любой совместимый клиент: Hiddify, v2rayNG, Streisand, FoXray." },
+  { q: "Работает ли с банковскими приложениями?", a: "Да. Через Per-App VPN на iOS и split tunneling на Android туннель автоматически отключается при открытии RU-приложений из whitelist и снова поднимается для заблокированных сервисов. Никаких ручных переключателей." },
+  { q: "Что если ноду заблокируют?", a: "Подписка автоматически переключится на резервный сервер. Subscription URL обновляется на лету — никаких действий от вас не требуется. У нас всегда 5+ свежих нод в ротации." },
+  { q: "Сколько устройств можно подключить?", a: "На стандартном тарифе — до 3 устройств, на VIP — до 10. Можно настроить на iPhone, Mac, Windows, Android и роутере одновременно." },
+  { q: "Какие протоколы поддерживаются?", a: "VLESS, VLESS-Reality, XTLS-Vision. Reality — самый стелс-протокол: маскирует трафик под легитимный TLS-handshake популярных сайтов." },
+  { q: "Можно ли вернуть деньги?", a: "Да, в течение 7 дней с момента оплаты — без вопросов. Напишите в Telegram-бот /refund." },
+  { q: "Есть ли лог-политика?", a: "Zero-logs. Мы не пишем ни IP, ни DNS-запросы, ни время сессий. Технически логи отключены на уровне Xray-конфигов." },
+  { q: "Что такое скидка 50% для мигрантов?", a: "Если у вас есть активная подписка на другой VPN — мы даём 50% скидку на аналогичный период. Платили за 1 месяц — получите 1 месяц за полцены. За год — год за полцены. Просто покажите скриншот оплаты в боте." },
+  { q: "Что такое VIP тариф?", a: "VIP тариф (300₽/мес) — это безлимитный трафик с обходом белых списков платформ. Если Wildberries, Ozon или банк блокируют вас через VPN — VIP решает эту проблему через резидентные IP и продвинутую маршрутизацию. До 10 устройств одновременно." },
+  { q: "Сколько трафика на стандартном тарифе?", a: "Стандартный тариф (100₽/мес) включает 50 ГБ трафика в месяц. Этого достаточно для повседневного использования: сайты, мессенджеры, соцсети, видео. Если нужен безлимит — выбирайте VIP." },
+];
+
+/* ───── PAGE ───── */
 export default function Home() {
-  const [selectedPlan, setSelectedPlan] = useState(1);
-  const [email, setEmail] = useState("");
-  const [showModal, setShowModal] = useState(false);
-  const [activeFaqCat, setActiveFaqCat] = useState("Общие");
+  const [shown, setShown] = useState([]);
+  const [selectedTier, setSelectedTier] = useState(2); // 6 months default
+  const [showDiscount, setShowDiscount] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState("standard");
 
-  const handlePay = (e) => {
-    e.preventDefault();
-    setShowModal(true);
-  };
+  useEffect(() => {
+    let i = 0;
+    const id = setInterval(() => {
+      setShown(s => (s.length >= logLines.length ? [logLines[0]] : [...s, logLines[i % logLines.length]]));
+      i++;
+    }, 700);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  const tiers = activeTab === "standard" ? standardTiers : premiumTiers;
+  const currentTier = tiers[selectedTier] || tiers[0];
+  const discountPrice = showDiscount ? Math.round(currentTier.price / 2) : null;
 
   return (
-    <div className="min-h-screen bg-[#18181b] text-zinc-200">
-      {/* ── HERO ── */}
-      <section className="relative overflow-hidden">
-        {/* Matrix-like bg dots */}
-        <div className="absolute inset-0 opacity-5" style={{backgroundImage:"radial-gradient(circle,#3b82f6 1px,transparent 1px)",backgroundSize:"24px 24px"}} />
+    <div className="min-h-screen bg-background text-foreground">
+      <Head>
+        <title>NEMO VPN — Stealth-туннель для свободного интернета</title>
+        <meta name="description" content="VLESS Reality VPN. Обход РКН, DPI, белых списков. Оплата МИР/СБП. 24ч бесплатно." />
+      </Head>
 
-        <div className="relative max-w-5xl mx-auto px-4 pt-24 pb-20 text-center">
-          <div className="inline-flex items-center gap-2 bg-zinc-800/60 border border-zinc-700 rounded-full px-4 py-1.5 text-sm mb-8">
-            <Lock size={14} className="text-blue-400" />
-            <span>VLESS Reality Protocol</span>
-          </div>
-
-          <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-6">
-            NEMO VPN —{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-blue-600">
-              свобода без границ
+      {/* ═══ NAVBAR ═══ */}
+      <nav className={`fixed top-0 inset-x-0 z-50 border-b transition-colors ${scrolled ? "border-border bg-background/85 backdrop-blur-md" : "border-transparent bg-transparent"}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+          <a href="#top" className="flex items-center gap-3">
+            <span className="font-display text-xl uppercase tracking-tighter text-foreground">
+              Nemo<span className="text-primary">.</span>VPN
             </span>
-          </h1>
-
-          <p className="text-lg sm:text-xl text-zinc-400 max-w-2xl mx-auto mb-10">
-            Обход РКН, белых списков платформ. Автоматическая маршрутизация. VLESS&nbsp;Reality.
-          </p>
-
-          <a href="#pricing" className="glow-btn inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 rounded-xl transition text-lg">
-            Получить доступ <Send size={18} />
+            <span className="hidden sm:inline-flex items-center gap-2 px-2 py-0.5 text-[10px] bg-primary text-primary-foreground font-bold tracking-widest uppercase">
+              <span className="size-1.5 rounded-full bg-primary-foreground animate-blink" />
+              Network Active
+            </span>
           </a>
+          <div className="hidden md:flex gap-7 text-xs uppercase tracking-widest font-bold">
+            {[
+              { href: "#manifesto", label: "Manifesto" },
+              { href: "#protocol", label: "Protocol" },
+              { href: "#pricing", label: "Access" },
+              { href: "#setup", label: "Setup" },
+              { href: "#faq", label: "FAQ" },
+            ].map(l => (
+              <a key={l.href} href={l.href} className="text-muted-foreground hover:text-primary transition-colors">{l.label}</a>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="hidden lg:block text-[10px] text-primary font-mono">NODE: RU-MOS-01 // 99.94%</span>
+            <a href="#pricing" className="px-3 py-2 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-widest hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
+              Acquire
+            </a>
+          </div>
+        </div>
+      </nav>
 
-          {/* Features grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-20">
-            {features.map((f) => (
-              <div key={f.title} className="bg-zinc-900/80 border border-zinc-800 rounded-xl p-6 text-left hover:border-blue-600/40 transition">
-                <f.icon className="text-blue-400 mb-3" size={28} />
-                <h3 className="font-semibold mb-1">{f.title}</h3>
-                <p className="text-sm text-zinc-500">{f.desc}</p>
+      {/* ═══ HERO ═══ */}
+      <header id="top" className="relative pt-32 pb-20 px-4 sm:px-6 nemo-noise">
+        <div className="absolute inset-0 pointer-events-none nemo-scan" />
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 relative">
+          <div className="lg:col-span-8 flex flex-col justify-center">
+            <div className="inline-flex w-fit items-center gap-2 mb-6 px-3 py-1 border border-border text-[10px] font-bold tracking-widest uppercase text-primary">
+              <span className="size-1.5 bg-primary animate-blink" />
+              Stealth Build v1.0.42 / AES-256-GCM
+            </div>
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl xl:text-8xl uppercase leading-[0.88] tracking-tighter text-foreground glitch" data-text="Broadcast from the Underground.">
+              Broadcast from <br />the <span className="text-primary">Underground</span>.
+            </h1>
+            <p className="mt-8 max-w-[54ch] text-base sm:text-lg text-muted-foreground leading-relaxed">
+              NEMO VPN — проприетарный stealth-туннель, спроектированный для обхода блокировок Роскомнадзора,
+              DPI-фильтрации и whitelist-сетей. Без логов. Без следов. Только чистый транзит.
+            </p>
+            <div className="mt-10 flex flex-wrap gap-4 items-stretch">
+              <a href="#pricing" className="bg-primary text-primary-foreground px-7 py-4 font-bold uppercase tracking-widest text-sm nemo-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+                Получить доступ
+              </a>
+              <a href="#setup" className="px-7 py-4 border border-border text-foreground font-bold uppercase tracking-widest text-sm hover:border-primary hover:text-primary transition-colors">
+                Инструкции
+              </a>
+              <div className="px-5 py-3 border border-border flex flex-col justify-center">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Current price</span>
+                <span className="font-bold tabular-nums text-foreground">от 100 ₽ / мес</span>
+              </div>
+            </div>
+            <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+              <span>✓ No logs</span>
+              <span>✓ VLESS / Reality</span>
+              <span>✓ Per-App VPN iOS</span>
+              <span>✓ Telegram Mini-App</span>
+              <span>✓ Скидка 50% мигрантам</span>
+            </div>
+          </div>
+          <aside className="lg:col-span-4 border border-border bg-surface p-3 relative">
+            <div className="absolute -top-3 left-3 px-2 py-0.5 bg-background border border-border text-[10px] tracking-widest text-muted-foreground uppercase">
+              ENCRYPTED_PREVIEW.DAT
+            </div>
+            <div className="bg-background aspect-[3/4] flex flex-col gap-1.5 p-4 overflow-hidden text-[11px] text-primary font-mono border border-border/50">
+              {shown.map((line, idx) => (
+                <div key={idx} className="animate-fade-up">{line}</div>
+              ))}
+              <div className="mt-auto space-y-1">
+                <div className="opacity-50 text-foreground">01011101 01100001 01111000</div>
+                <div className="opacity-30 text-foreground">11010110 00110111 11011100</div>
+                <div className="h-10 w-full bg-primary/20 relative overflow-hidden">
+                  <div className="absolute inset-y-0 w-1/3 bg-primary/60 animate-blink" />
+                </div>
+                <div className="flex justify-between text-[10px] text-muted-foreground uppercase">
+                  <span>UPTIME 99.94%</span>
+                  <span>0.00% LEAK</span>
+                </div>
+              </div>
+            </div>
+          </aside>
+        </div>
+
+        {/* Marquee */}
+        <div className="mt-16 border-y border-border py-3 overflow-hidden">
+          <div className="flex gap-12 animate-marquee whitespace-nowrap text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
+            {[...Array(4)].map((_, k) => (
+              <div key={k} className="flex gap-12 shrink-0">
+                <span>★ Bypass Roskomnadzor</span>
+                <span>★ Whitelist Override</span>
+                <span>★ Reality Protocol</span>
+                <span>★ Zero Logs Policy</span>
+                <span>★ Per-App VPN iOS</span>
+                <span>★ Telegram Mini-App</span>
+                <span>★ Anonymous Pay</span>
+                <span>★ 99.94% Uptime</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </header>
+
+      {/* ═══ MANIFESTO ═══ */}
+      <section id="manifesto" className="px-4 sm:px-6 py-24 sm:py-32 relative">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          <div className="lg:col-span-7">
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Manifesto</span>
+            <h2 className="mt-6 font-display text-4xl sm:text-5xl md:text-6xl uppercase leading-[0.95] tracking-tighter text-foreground">
+              Интернет должен быть <span className="text-primary italic">свободным</span>. <br />
+              Мы делаем его таким снова.
+            </h2>
+            <div className="mt-8 space-y-5 text-muted-foreground text-base sm:text-lg max-w-[60ch] leading-relaxed">
+              <p>
+                NEMO построен инженерами для тех, кто устал от того, что государство решает,
+                какой контент вам потреблять. Никаких заявок, никаких объяснений, никаких
+                «это для вашей безопасности».
+              </p>
+              <p>
+                Мы используем актуальные stealth-протоколы (VLESS-Reality, XTLS, Vision),
+                маскируем трафик под обычный HTTPS и держим ноды там, где их не достанут
+                суверенные фаерволы. Если ноду банят — поднимаем новую за 4 минуты.
+              </p>
+            </div>
+          </div>
+          <div className="lg:col-span-5 grid grid-cols-2 gap-px bg-border border border-border">
+            {[
+              { k: "DPI", v: "Bypass" },
+              { k: "RKN", v: "Override" },
+              { k: "Whitelist", v: "Cracked" },
+              { k: "Logs", v: "Zero" },
+            ].map(p => (
+              <div key={p.k} className="bg-background p-8 group hover:bg-surface transition-colors">
+                <div className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">// {p.k}</div>
+                <div className="font-display text-3xl uppercase text-primary">{p.v}</div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── PRICING ── */}
-      <section id="pricing" className="max-w-5xl mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-12">Тарифы</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {plans.map((p, i) => (
-            <button
-              key={p.name}
-              onClick={() => setSelectedPlan(i)}
-              className={`relative rounded-xl p-6 text-left border transition ${
-                selectedPlan === i
-                  ? "border-blue-500 bg-zinc-900 shadow-lg shadow-blue-500/10"
-                  : "border-zinc-800 bg-zinc-900/50 hover:border-zinc-700"
-              }`}
-            >
-              {p.popular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-xs px-3 py-1 rounded-full font-medium">Популярный</span>
-              )}
-              <h3 className="text-xl font-bold">{p.name}</h3>
-              <p className="mt-2 text-3xl font-bold text-blue-400">
-                {p.price}<span className="text-base text-zinc-500 font-normal">{p.period}</span>
-              </p>
-              <ul className="mt-4 space-y-2 text-sm text-zinc-400">
-                <li>✓ {p.traffic}</li>
-                <li>✓ {p.devices}</li>
-                <li>✓ VLESS Reality</li>
-                <li>✓ Авто-маршрутизация</li>
-              </ul>
-            </button>
+      {/* ═══ HOW IT WORKS ═══ */}
+      <section id="protocol" className="border-y border-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 flex items-baseline gap-4">
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Protocol Sequence</span>
+          <div className="h-px grow bg-border" />
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">03 Steps</span>
+        </div>
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 border-t border-l border-border">
+          {[
+            { n: "01", title: "Anonymous Pay", body: "Оплата картой МИР, СБП, ЮMoney или криптой через защищённый чекаут. Никакой регистрации — только email для доставки ключей. Telegram Stars тоже доступен.", highlight: false },
+            { n: "02", title: "Dual Key Delivery", body: "Мгновенно на email прилетают: subscription URL (автообновление серверов) и routing-ключ для VLESS/Reality. Также доступны прямо в Telegram-боте.", highlight: true },
+            { n: "03", title: "One-Tap Deploy", body: "Импорт ключей в Streisand, v2rayNG, FoXray или Hiddify. Per-App VPN на iOS автоматически включает туннель только для заблокированных приложений.", highlight: false },
+          ].map(s => (
+            <article key={s.n} className={`p-10 lg:p-12 border-r border-b border-border ${s.highlight ? "bg-primary text-primary-foreground" : "bg-background"}`}>
+              <div className={`font-display text-5xl italic mb-6 ${s.highlight ? "text-primary-foreground" : "text-primary"}`}>{s.n}</div>
+              <h3 className={`text-2xl font-bold uppercase mb-4 ${s.highlight ? "text-primary-foreground" : "text-foreground"}`}>{s.title}</h3>
+              <p className={`text-sm leading-relaxed ${s.highlight ? "text-primary-foreground/80" : "text-muted-foreground"}`}>{s.body}</p>
+            </article>
           ))}
         </div>
+      </section>
 
-        {/* Order form */}
-        <form onSubmit={handlePay} className="max-w-md mx-auto flex flex-col sm:flex-row gap-3">
-          <div className="relative flex-1">
-            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500" size={18} />
-            <input
-              type="email"
-              required
-              placeholder="your@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-zinc-900 border border-zinc-700 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:border-blue-500 transition text-sm"
-            />
+      {/* ═══ PRICING ═══ */}
+      <section id="pricing" className="bg-surface border-y border-border px-4 sm:px-6 py-24">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Select Tier</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter">
+              Выберите режим доступа
+            </h2>
+            <p className="mt-4 text-muted-foreground text-sm max-w-md mx-auto">
+              Универсальный доступ ко всем нодам и протоколам. Оплата МИР / СБП / ЮMoney / крипта.
+            </p>
           </div>
-          <button type="submit" className="glow-btn flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-lg transition">
-            <CreditCard size={18} /> Оплатить
-          </button>
-        </form>
-        <p className="text-center text-xs text-zinc-600 mt-3">
-          Выбран: {plans[selectedPlan].name} ({plans[selectedPlan].price}/мес)
-        </p>
-      </section>
 
-      {/* ── INSTRUCTIONS ── */}
-      <section className="max-w-3xl mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-4">Инструкции</h2>
-        <p className="text-center text-zinc-500 mb-10">Настройка за 2 минуты на любом устройстве</p>
-        <div className="space-y-3">
-          {instructions.map((inst) => (
-            <Accordion key={inst.title} title={
-              <span className="flex items-center gap-3">
-                <inst.icon size={20} className="text-blue-400" /> {inst.title}
-              </span>
-            }>
-              {inst.content}
-            </Accordion>
-          ))}
+          {/* Tab switcher */}
+          <div className="flex justify-center gap-2 mb-10">
+            {[
+              { id: "standard", label: "Стандарт" },
+              { id: "premium", label: "VIP (Обход белых списков)" },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => { setActiveTab(tab.id); setSelectedTier(0); }}
+                className={`px-4 py-2 text-xs uppercase tracking-widest font-bold transition-all ${
+                  activeTab === tab.id
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-muted-foreground hover:border-primary hover:text-primary"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {tiers.map((t, i) => (
+              <button
+                key={t.months}
+                onClick={() => setSelectedTier(i)}
+                className={`relative p-8 flex flex-col text-left transition-all neon-border ${
+                  selectedTier === i
+                    ? t.highlight
+                      ? "border-2 border-primary nemo-glow bg-background"
+                      : "border-2 border-primary bg-background"
+                    : "border border-border bg-background hover:border-primary/50"
+                }`}
+              >
+                {t.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest">
+                    Popular
+                  </div>
+                )}
+                <div className="text-[11px] text-muted-foreground uppercase tracking-widest mb-3">{t.label}</div>
+                {t.discount && (
+                  <div className="text-[10px] text-primary font-bold uppercase mb-2">Скидка {t.discount}</div>
+                )}
+                <div className="flex items-baseline gap-2 mb-2">
+                  <span className="text-4xl font-display font-bold tabular-nums text-foreground">
+                    {t.price}<span className="text-lg text-muted-foreground"> ₽</span>
+                  </span>
+                </div>
+                <div className="text-xs text-muted-foreground mb-6">{t.monthly} ₽ / мес</div>
+                <ul className="space-y-3 mb-8 text-sm">
+                  <li className="flex items-start gap-3 text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
+                    <span>VLESS Reality</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
+                    <span>{activeTab === "standard" ? "50 ГБ / мес" : "Безлимит"}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
+                    <span>{activeTab === "standard" ? "3 устройства" : "10 устройств"}</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
+                    <span>{activeTab === "standard" ? "Все ноды" : "Все ноды + резидентные IP"}</span>
+                  </li>
+                  {activeTab === "premium" && (
+                    <li className="flex items-start gap-3 text-muted-foreground">
+                      <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
+                      <span>Обход белых списков</span>
+                    </li>
+                  )}
+                  <li className="flex items-start gap-3 text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
+                    <span>Per-App VPN iOS</span>
+                  </li>
+                  <li className="flex items-start gap-3 text-muted-foreground">
+                    <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
+                    <span>Telegram Mini-App</span>
+                  </li>
+                </ul>
+                <div className={`mt-auto w-full py-3 text-center font-bold uppercase tracking-widest text-xs transition-all ${
+                  selectedTier === i
+                    ? "bg-primary text-primary-foreground"
+                    : "border border-border text-foreground hover:bg-primary hover:text-primary-foreground hover:border-primary"
+                }`}>
+                  {selectedTier === i ? "Выбрано ✓" : "Выбрать"}
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Discount banner with interactive toggle */}
+          <div className="mt-10 border border-primary/30 bg-background p-6 max-w-2xl mx-auto neon-border">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">50% скидка</span>
+              <span className="text-sm text-muted-foreground">Для мигрантов с другого VPN</span>
+            </div>
+            <div className="flex items-center gap-4 mb-4">
+              <label className="flex items-center gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  className="vpn-toggle"
+                  checked={showDiscount}
+                  onChange={() => setShowDiscount(!showDiscount)}
+                />
+                <span className="text-sm font-bold text-foreground">У меня уже есть VPN</span>
+              </label>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Если у вас есть активная подписка на другой VPN — мы даём <strong className="text-primary">50% скидку</strong> на аналогичный период.
+              Платили за 1 месяц — получите 1 месяц за полцены. За 3 месяца — 3 месяца за полцены. За год — год за полцены.
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">Покажите скриншот оплаты в <a href="https://t.me/nemo_vpn_bot" className="text-primary border-b border-primary pb-0.5">@nemo_vpn_bot</a></p>
+            {showDiscount && (
+              <div className="mt-4 p-3 bg-surface border border-primary discount-reveal">
+                <div className="font-mono text-sm">
+                  <span className="text-muted-foreground">Старая цена: </span>
+                  <span className="text-muted-foreground line-through">{currentTier.price} ₽</span>
+                  <span className="text-muted-foreground ml-4">Новая цена: </span>
+                  <span className="text-primary font-bold tabular-nums text-lg">{Math.round(currentTier.price / 2)} ₽</span>
+                  <span className="text-muted-foreground ml-2">/ {currentTier.label}</span>
+                </div>
+                <div className="mt-2 text-xs text-primary">
+                  Экономия: {Math.round(currentTier.price / 2)} ₽
+                </div>
+              </div>
+            )}
+          </div>
+
+          <p className="mt-10 text-center text-[11px] text-muted-foreground uppercase tracking-widest">
+            После оплаты ключи приходят на email и в Telegram в течение 30 секунд. 24ч бесплатно. Гарантия возврата 7 дней.
+          </p>
         </div>
       </section>
 
-      {/* ── FAQ ── */}
-      <section className="max-w-3xl mx-auto px-4 py-20">
-        <h2 className="text-3xl font-bold text-center mb-4">FAQ</h2>
-        <p className="text-center text-zinc-500 mb-8">Часто задаваемые вопросы</p>
+      {/* ═══ iOS Per-App VPN ═══ */}
+      <section className="px-4 sm:px-6 py-24 nemo-noise">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div>
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ iOS Automation</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter leading-[0.95]">
+              Per-App <span className="text-primary italic">VPN</span>
+            </h2>
+            <p className="mt-6 text-muted-foreground text-base sm:text-lg max-w-[55ch] leading-relaxed">
+              Настройте VPN для каждого приложения отдельно. Instagram, YouTube и ChatGPT работают через VPN,
+              а Сбер, Госуслуги и Wildberries — через прямое соединение. Без переключателей. Автоматически.
+            </p>
+            <ul className="mt-8 space-y-4">
+              {[
+                "Не садит батарею — туннель активен только для нужных приложений",
+                "Банки и маркетплейсы видят российский IP — никаких блокировок",
+                "Работает с iOS 16+, iPadOS, macOS Sonoma",
+                "Настраивается за 2 минуты через Streisand или V2Box",
+              ].map(b => (
+                <li key={b} className="flex gap-4 items-start">
+                  <span className="mt-2 size-1.5 bg-primary shrink-0" />
+                  <span className="text-foreground/80">{b}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        <div className="flex gap-2 flex-wrap justify-center mb-8">
-          {faqData.map((c) => (
-            <button
-              key={c.cat}
-              onClick={() => setActiveFaqCat(c.cat)}
-              className={`px-4 py-1.5 rounded-full text-sm border transition ${
-                activeFaqCat === c.cat ? "bg-blue-600 border-blue-600 text-white" : "border-zinc-700 text-zinc-400 hover:border-zinc-500"
-              }`}
-            >
-              {c.cat}
-            </button>
-          ))}
-        </div>
+          <div className="relative">
+            <div className="absolute -inset-3 border border-primary/30" />
+            <div className="relative bg-background border border-border p-5 font-mono text-xs">
+              <div className="flex items-center justify-between mb-4 text-[10px] uppercase tracking-widest text-muted-foreground">
+                <span>PER_APP_VPN.conf</span>
+                <span className="text-primary animate-blink">● ACTIVE</span>
+              </div>
+              <pre className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-wrap">{`# NEMO Per-App VPN Configuration
+# iOS Settings → VPN → Streisand → (i)
 
-        <div className="space-y-3">
-          {faqData.filter((c) => c.cat === activeFaqCat)[0].items.map((item) => (
-            <Accordion key={item.q} title={item.q}>
-              <p>{item.a}</p>
-            </Accordion>
-          ))}
+[vpn-apps]
+# Через VPN (заблокированные):
+connect = [
+  "com.instagram",
+  "com.google.youtube",
+  "com.openai.chatgpt",
+  "com.spotify.client",
+]
+
+# Напрямую (российские):
+bypass = [
+  "ru.sberbank.mobile",
+  "com.vkontakte",
+  "ru.ozon.android",
+  "ru.wildberries",
+  "ru.gosuslugi",
+]
+
+[default]
+route = vpn  # всё остальное через VPN`}</pre>
+              <div className="mt-4 grid grid-cols-2 gap-2">
+                {[
+                  { trigger: "Open: Instagram", action: "VPN → ON", on: true },
+                  { trigger: "Open: YouTube", action: "VPN → ON", on: true },
+                  { trigger: "Open: Сбер", action: "VPN → OFF", on: false },
+                  { trigger: "Open: Wildberries", action: "VPN → OFF", on: false },
+                ].map(row => (
+                  <div key={row.trigger} className="border border-border p-3 flex flex-col gap-1">
+                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest">{row.trigger}</span>
+                    <span className={`text-[11px] font-bold ${row.on ? "text-primary" : "text-muted-foreground line-through"}`}>
+                      → {row.action}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* ── FOOTER ── */}
-      <footer className="border-t border-zinc-800 py-10">
-        <div className="max-w-5xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-zinc-500">© 2026 NEMO VPN</p>
-          <div className="flex gap-6 text-sm text-zinc-500">
-            <a href="https://t.me/nemovpn_bot" target="_blank" rel="noreferrer" className="hover:text-blue-400 transition flex items-center gap-1">
-              <Send size={14} /> Telegram
-            </a>
-            <a href="#" className="hover:text-blue-400 transition flex items-center gap-1">
-              <ExternalLink size={14} /> GitHub
-            </a>
-            <a href="#" className="hover:text-blue-400 transition flex items-center gap-1">
-              <ExternalLink size={14} /> VK
+      {/* ═══ TELEGRAM BOT ═══ */}
+      <section className="px-4 sm:px-6 py-24 bg-surface border-y border-border">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          <div className="relative order-2 lg:order-1">
+            <div className="absolute -inset-3 border border-primary/30" />
+            <div className="relative bg-background border border-border aspect-[9/16] max-w-sm mx-auto p-4 flex flex-col">
+              <div className="flex items-center justify-between text-[10px] font-mono text-muted-foreground uppercase tracking-widest pb-3 border-b border-border">
+                <span>@nemo_vpn_bot</span>
+                <span className="text-primary">● online</span>
+              </div>
+              <div className="flex-1 flex flex-col gap-3 py-4 overflow-hidden">
+                <div className="self-start max-w-[80%] bg-surface border border-border px-3 py-2 text-xs">
+                  👋 Привет! Твоя подписка <span className="text-primary">Standard</span> активна до 22.05.2026
+                </div>
+                <div className="self-end max-w-[80%] bg-primary text-primary-foreground px-3 py-2 text-xs font-bold">/stats</div>
+                <div className="self-start max-w-[85%] bg-surface border border-border px-3 py-2 text-xs space-y-1">
+                  <div>📊 Использовано: 14.2 GB</div>
+                  <div>🌐 Активная нода: AMS-02</div>
+                  <div>⚡ Пинг: 12ms</div>
+                </div>
+                <div className="self-end max-w-[80%] bg-primary text-primary-foreground px-3 py-2 text-xs font-bold">
+                  Открыть Mini-App ↗
+                </div>
+              </div>
+              <div className="border-t border-border pt-3 grid grid-cols-3 gap-1.5">
+                {["Keys", "Stats", "Help"].map(b => (
+                  <div key={b} className="border border-border py-2 text-[10px] font-bold uppercase tracking-widest text-center text-muted-foreground">{b}</div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="order-1 lg:order-2">
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Telegram Mini-App</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter leading-[0.95]">
+              Контроль из <span className="text-primary italic">кармана</span>
+            </h2>
+            <p className="mt-6 text-muted-foreground text-base sm:text-lg max-w-[55ch] leading-relaxed">
+              Управляйте VPN-аккаунтом прямо в Telegram через Mini-App: продление, ротация ключей, статистика, переключение нод.
+            </p>
+            <ul className="mt-8 space-y-3">
+              {[
+                "Управление подпиской и продление",
+                "Ротация ключей в один тап",
+                "Статистика трафика и подключений",
+                "Смена сервера и протокола на лету",
+                "Поддержка прямо в чате 24/7",
+              ].map(f => (
+                <li key={f} className="flex items-start gap-3 text-foreground/80">
+                  <span className="mt-2 size-1.5 bg-primary shrink-0" />
+                  <span>{f}</span>
+                </li>
+              ))}
+            </ul>
+            <a href="https://t.me/nemo_vpn_bot" target="_blank" rel="noopener" className="mt-10 inline-flex bg-primary text-primary-foreground px-7 py-4 font-bold uppercase tracking-widest text-sm nemo-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
+              Открыть @nemo_vpn_bot
             </a>
           </div>
+        </div>
+      </section>
+
+      {/* ═══ SETUP GUIDES ═══ */}
+      <section id="setup" className="px-4 sm:px-6 py-24">
+        <div className="max-w-7xl mx-auto">
+          <div className="flex items-end justify-between flex-wrap gap-6 mb-12">
+            <div>
+              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Setup Manuals</span>
+              <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter max-w-3xl">
+                Инструкции
+              </h2>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border">
+            {guides.map(g => (
+              <div key={g.title} className="bg-background p-6 group hover:bg-surface transition-colors flex flex-col gap-5">
+                <div className="aspect-video bg-surface relative overflow-hidden border border-border">
+                  <div className="absolute inset-0 opacity-30" style={{backgroundImage: "repeating-linear-gradient(45deg, hsl(70 100% 50% / 0.15) 0 2px, transparent 2px 12px)"}} />
+                  <div className="absolute top-3 left-3 px-2 py-0.5 bg-background border border-border text-[10px] uppercase tracking-widest text-primary">{g.tag}</div>
+                  <div className="absolute bottom-3 right-3 px-2 py-0.5 bg-primary text-primary-foreground text-[10px] uppercase tracking-widest font-bold">{g.type}</div>
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-foreground group-hover:text-primary transition-colors">{g.title}</h3>
+                  <div className="mt-2 text-[11px] uppercase tracking-widest text-muted-foreground">{g.duration}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Detailed instructions */}
+          <div className="mt-16 max-w-3xl mx-auto space-y-6">
+            <h3 className="font-display text-2xl uppercase tracking-tighter text-foreground mb-8">Подробные инструкции</h3>
+
+            <Accordion title={{ num: "01", text: "iOS / iPadOS — Per-App VPN" }} defaultOpen>
+              <div className="space-y-3">
+                <p><strong className="text-foreground">Автоматическое переключение VPN для российских и заблокированных сервисов.</strong></p>
+                <CopyBlock text="Скачать Streisand (TestFlight) → Открыть ссылку-ключ из бота → Настроить Per-App VPN" />
+                <p className="text-sm mt-3"><strong className="text-primary">Per-App VPN настройка:</strong></p>
+                <ol className="list-decimal pl-5 space-y-1 text-sm">
+                  <li>Настройки → VPN → Streisand → нажмите (i)</li>
+                  <li>«Использовать VPN для» → выберите приложения</li>
+                  <li>Instagram, YouTube, ChatGPT — через VPN</li>
+                  <li>Сбер, ВТБ, Госуслуги, Wildberries — напрямую</li>
+                  <li>Всё переключается автоматически</li>
+                </ol>
+              </div>
+            </Accordion>
+
+            <Accordion title={{ num: "02", text: "Android — v2rayNG / NekoBox" }}>
+              <div className="space-y-3">
+                <p>VLESS Reality + автоматическая маршрутизация через v2rayNG или NekoBox.</p>
+                <CopyBlock text="Скачать v2rayNG → Скопировать ссылку-ключ из бота → Импорт из буфера → Подключиться" />
+                <p className="text-xs text-muted-foreground mt-2">Split tunneling: Настройки → Apps → выберите, какие приложения через VPN</p>
+              </div>
+            </Accordion>
+
+            <Accordion title={{ num: "03", text: "macOS / Windows — FoXray / Hiddify" }}>
+              <div className="space-y-3">
+                <p>Используйте Hiddify Next (Windows/macOS) или FoXray (macOS).</p>
+                <CopyBlock text="Скопировать ссылку-ключ из бота → Импорт в клиент → Подключиться" />
+              </div>
+            </Accordion>
+
+            <Accordion title={{ num: "04", text: "Роутер — Keenetic / OpenWRT" }}>
+              <div className="space-y-3">
+                <p>Настройка через Xray-core для роутеров с поддержкой пользовательских пакетов.</p>
+                <CopyBlock text="opkg install xray-core → Скопировать конфиг → /etc/xray/config.json → Запустить" />
+                <p className="text-xs text-muted-foreground">Конфигурационный файл доступен в Telegram-боте по команде /router</p>
+              </div>
+            </Accordion>
+          </div>
+        </div>
+      </section>
+
+      {/* ═══ FAQ ═══ */}
+      <section id="faq" className="px-4 sm:px-6 py-24 bg-surface border-y border-border">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-14">
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ FAQ</span>
+            <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter">
+              Вопросы и ответы
+            </h2>
+          </div>
+
+          <div className="border-t border-border">
+            {faqs.map((f, i) => (
+              <Accordion key={i} title={{ num: String(i + 1).padStart(2, "0"), text: f.q }}>
+                <p>{f.a}</p>
+              </Accordion>
+            ))}
+          </div>
+
+          <p className="mt-10 text-center text-[11px] uppercase tracking-widest text-muted-foreground">
+            Не нашли ответ? Напишите в{" "}
+            <a href="https://t.me/nemo_vpn_bot" className="text-primary border-b border-primary pb-0.5">@nemo_vpn_bot</a>{" "}
+            — отвечаем в течение 5 минут
+          </p>
+        </div>
+      </section>
+
+      {/* ═══ FOOTER ═══ */}
+      <footer className="px-4 sm:px-6 py-12 border-t border-border">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-10 items-start">
+          <div className="md:col-span-5">
+            <div className="font-display text-3xl uppercase tracking-tighter">
+              Nemo<span className="text-primary">.</span>VPN
+            </div>
+            <div className="mt-2 text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
+              Est. 2024 / Built for the Blackout
+            </div>
+            <p className="mt-6 text-sm text-muted-foreground max-w-sm">
+              Stealth-туннель для тех, кому нужен интернет без границ. Без логов, без рекламы, без компромиссов.
+            </p>
+          </div>
+          <div className="md:col-span-3">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Продукт</div>
+            <ul className="space-y-2 text-sm">
+              <li><a href="#pricing" className="hover:text-primary transition-colors">Тарифы</a></li>
+              <li><a href="#setup" className="hover:text-primary transition-colors">Инструкции</a></li>
+              <li><a href="#faq" className="hover:text-primary transition-colors">FAQ</a></li>
+            </ul>
+          </div>
+          <div className="md:col-span-2">
+            <div className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-4">Контакт</div>
+            <ul className="space-y-2 text-sm">
+              <li><a href="https://t.me/nemo_vpn_bot" className="text-primary border-b border-primary pb-0.5">@nemo_vpn_bot</a></li>
+            </ul>
+          </div>
+          <div className="md:col-span-2 text-right">
+            <div className="text-[10px] text-primary font-mono">SIGNAL_STRENGTH_100%</div>
+            <div className="text-[10px] text-muted-foreground font-mono mt-1">STAY_INVISIBLE</div>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-border flex flex-col md:flex-row justify-between gap-3 text-[10px] uppercase tracking-widest text-muted-foreground">
+          <div>© 2024–2026 NEMO Networks // No logs · No trace · No surrender</div>
         </div>
       </footer>
-
-      {/* ── MODAL ── */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-zinc-900 border border-zinc-700 rounded-2xl p-8 max-w-sm w-full text-center" onClick={(e) => e.stopPropagation()}>
-            <div className="text-5xl mb-4">🚧</div>
-            <h3 className="text-xl font-bold mb-2">В разработке</h3>
-            <p className="text-zinc-400 text-sm mb-6">
-              Интеграция с платёжной системой и Telegram-ботом скоро будет доступна. Следите за обновлениями!
-            </p>
-            <button onClick={() => setShowModal(false)} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg transition">
-              Понятно
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
