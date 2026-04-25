@@ -35,7 +35,7 @@ function CopyBlock({ text }) {
 
 // Тарифы из vpn_bot/config.py: базовая цена 100₽/мес, VIP 300₽/мес
 // Скидки: 3м=10%, 6м=17%, 12м=25%
-// Скидка 50% для мигрантов с другого VPN
+// Скидка 50% для тех, у кого уже есть платный VPN
 const standardTiers = [
   { months: 1, label: "1 месяц", price: 100, monthly: 100 },
   { months: 3, label: "3 месяца", price: 270, monthly: 90, discount: "10%", highlight: false },
@@ -75,9 +75,9 @@ const faqs = [
   { q: "Что если ноду заблокируют?", a: "Подписка автоматически переключится на резервный сервер. Subscription URL обновляется на лету — никаких действий от вас не требуется. У нас всегда 5+ свежих нод в ротации." },
   { q: "Сколько устройств можно подключить?", a: "На стандартном тарифе — без device tracking, подключайте сколько нужно. На VIP — device tracking активирован для защиты от расшаривания аккаунта." },
   { q: "Какие протоколы поддерживаются?", a: "VLESS, VLESS-Reality, XTLS-Vision. Reality — самый стелс-протокол: маскирует трафик под легитимный TLS-handshake популярных сайтов." },
-  { q: "Можно ли вернуть деньги?", a: "Да, в течение 7 дней с момента оплаты — без вопросов. Напишите в Telegram-бот /refund." },
+
   { q: "Есть ли лог-политика?", a: "Zero-logs. Мы не пишем ни IP, ни DNS-запросы, ни время сессий. Технически логи отключены на уровне Xray-конфигов." },
-  { q: "Как получить скидку 50%?", a: "Если у вас есть активная платная подписка на другой VPN — мы даём 50% скидку на аналогичный период. Платили за 1 месяц — получите 1 месяц за полцены. За год — год за полцены. Просто покажите скриншот оплаты или загрузите подтверждение в боте. Проверка занимает 2 минуты." },
+  { q: "Как получить скидку 50%?", a: "Если у вас уже есть платный VPN — покажите скриншот оплаты в боте и получите 50% скидку на аналогичный период. Платили за 1 месяц — получите 1 месяц за полцены. За год — год за полцены." },
   { q: "Что такое VIP тариф?", a: "VIP тариф (300₽/мес) — это обход белых списков платформ. Если Wildberries, Ozon или банк блокируют вас через VPN — VIP решает эту проблему через резидентные IP и продвинутую маршрутизацию. Включает лимит трафика: 100 ГБ на месяц, 350 ГБ на 3 месяца, 800 ГБ на 6 месяцев, 2048 ГБ на год. Можно докупать: 50 ГБ за 100₽, 100 ГБ за 200₽." },
   { q: "Сколько трафика на стандартном тарифе?", a: "Стандартный тариф (100₽/мес) — это полный безлимит. Никаких ограничений по трафику. Серфите, смотрите видео, скачивайте — без счётчика." },
 ];
@@ -87,6 +87,7 @@ export default function Home() {
   const [shown, setShown] = useState([]);
   const [selectedTier, setSelectedTier] = useState(2); // 6 months default
   const [showDiscount, setShowDiscount] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [activeTab, setActiveTab] = useState("standard");
 
@@ -168,6 +169,9 @@ export default function Home() {
               <a href="#pricing" className="bg-primary text-primary-foreground px-7 py-4 font-bold uppercase tracking-widest text-sm nemo-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
                 Получить доступ
               </a>
+              <a href="#discount" className="px-7 py-4 border-2 border-red-500 text-red-500 font-bold uppercase tracking-widest text-sm animate-red-blink hover:bg-red-500 hover:text-white transition-all">
+                VPN за полцены
+              </a>
               <a href="#setup" className="px-7 py-4 border border-border text-foreground font-bold uppercase tracking-widest text-sm hover:border-primary hover:text-primary transition-colors">
                 Инструкции
               </a>
@@ -182,7 +186,7 @@ export default function Home() {
               <span>✓ Ключ маршрутизации</span>
               <span>✓ Per-App VPN iOS</span>
               <span>✓ Telegram Mini-App</span>
-              <span>✓ −50% при переходе от конкурента</span>
+              <span>✓ −50% если есть платный VPN</span>
             </div>
           </div>
           <aside className="lg:col-span-4 border border-border bg-surface p-3 relative">
@@ -249,18 +253,20 @@ export default function Home() {
               </p>
             </div>
           </div>
-          <div className="lg:col-span-5 grid grid-cols-2 gap-px bg-border border border-border">
-            {[
-              { k: "DPI", v: "Обход" },
-              { k: "РКН", v: "Непобедим" },
-              { k: "Белые списки", v: "Взломаны" },
-              { k: "Логи", v: "Ноль" },
-            ].map(p => (
-              <div key={p.k} className="bg-background p-8 group hover:bg-surface transition-colors">
-                <div className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">// {p.k}</div>
-                <div className="font-display text-3xl uppercase text-primary">{p.v}</div>
-              </div>
-            ))}
+          <div className="lg:col-span-5 border border-border">
+            <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-px bg-border">
+              {[
+                { k: "DPI", v: "Обход" },
+                { k: "РКН", v: "Не видит" },
+                { k: "Белые списки", v: "Обход" },
+                { k: "Логи", v: "Ноль" },
+              ].map(p => (
+                <div key={p.k} className="bg-background p-5 sm:p-8 group hover:bg-surface transition-colors flex flex-col justify-center items-center text-center">
+                  <div className="text-[10px] sm:text-[11px] uppercase tracking-widest text-muted-foreground mb-2">// {p.k}</div>
+                  <div className="font-display text-xl sm:text-2xl lg:text-3xl uppercase text-primary">{p.v}</div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>
@@ -409,11 +415,50 @@ export default function Home() {
             ))}
           </div>
 
+          {/* Кнопка оплаты */}
+          <div className="mt-8 text-center">
+            <button
+              onClick={() => setShowPaymentModal(true)}
+              className="bg-primary text-primary-foreground px-10 py-4 font-bold uppercase tracking-widest text-sm nemo-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all"
+            >
+              Оплатить {showDiscount ? Math.round(currentTier.price / 2) : currentTier.price} ₽
+            </button>
+          </div>
+
+          {/* Модальное окно оплаты */}
+          {showPaymentModal && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm" onClick={() => setShowPaymentModal(false)}>
+              <div className="bg-background border border-border p-8 max-w-md w-full mx-4 relative" onClick={e => e.stopPropagation()}>
+                <button onClick={() => setShowPaymentModal(false)} className="absolute top-4 right-4 text-muted-foreground hover:text-primary transition-colors text-xl">✕</button>
+                <div className="text-center space-y-4">
+                  <div className="text-5xl">🚧</div>
+                  <h3 className="font-display text-2xl uppercase tracking-tighter text-foreground">Оплата скоро будет доступна</h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Мы готовим для вас удобную оплату через СБП и криптовалюту. А пока — напишите нам в Telegram-бот, и мы оформим подписку вручную.
+                  </p>
+                  <div className="text-3xl font-display font-bold tabular-nums text-primary">
+                    {showDiscount ? Math.round(currentTier.price / 2) : currentTier.price} ₽
+                    <span className="text-sm text-muted-foreground ml-2">/ {currentTier.label}</span>
+                    {activeTab === "premium" && " (VIP)"}
+                  </div>
+                  <a
+                    href="https://t.me/nemo_vpn_bot"
+                    target="_blank"
+                    rel="noopener"
+                    className="inline-block bg-primary text-primary-foreground px-7 py-4 font-bold uppercase tracking-widest text-sm nemo-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all mt-4"
+                  >
+                    Написать в @nemo_vpn_bot
+                  </a>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Discount banner with interactive toggle */}
-          <div className="mt-10 border border-primary/30 bg-background p-6 max-w-2xl mx-auto neon-border">
+          <div id="discount" className="mt-10 border border-primary/30 bg-background p-6 max-w-2xl mx-auto neon-border">
             <div className="flex items-center gap-3 mb-4">
               <span className="bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">−50%</span>
-              <span className="text-sm text-muted-foreground">При переходе от другого VPN</span>
+              <span className="text-sm text-muted-foreground">Если уже есть платный VPN</span>
             </div>
             <div className="flex items-center gap-4 mb-4">
               <label className="flex items-center gap-3 cursor-pointer">
@@ -427,7 +472,7 @@ export default function Home() {
               </label>
             </div>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Если у вас есть активная подписка на другой VPN — мы даём <strong className="text-primary">50% скидку</strong> на аналогичный период.
+              Если у вас уже есть платный VPN — мы даём <strong className="text-primary">50% скидку</strong> на аналогичный период.
               Платили за 1 месяц — получите 1 месяц за полцены. За 3 месяца — 3 месяца за полцены. За год — год за полцены.
             </p>
             <p className="text-xs text-muted-foreground mt-2">Покажите скриншот оплаты в <a href="https://t.me/nemo_vpn_bot" className="text-primary border-b border-primary pb-0.5">@nemo_vpn_bot</a></p>
@@ -448,7 +493,7 @@ export default function Home() {
           </div>
 
           <p className="mt-10 text-center text-[11px] text-muted-foreground uppercase tracking-widest">
-            После оплаты ключи приходят на email и в Telegram в течение 30 секунд. 24ч бесплатно. Гарантия возврата 7 дней.
+            После оплаты ключи приходят на email и в Telegram в течение 30 секунд. 24ч бесплатно.
           </p>
         </div>
       </section>

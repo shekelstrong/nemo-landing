@@ -105,7 +105,15 @@
   animation: fade-up 0.5s ease-out forwards;
 }
 .animate-marquee {
-  animation: marquee 30s linear infinite;
+  animation: marquee 14s linear infinite;
+}
+
+.animate-red-blink {
+  animation: red-blink 1s ease-in-out infinite;
+}
+@keyframes red-blink {
+  0%, 100% { opacity: 1; border-color: rgb(239 68 68); color: rgb(239 68 68); }
+  50% { opacity: 0.4; border-color: rgb(239 68 68); color: rgb(239 68 68); }
 }
 
 /* Noise overlay */
