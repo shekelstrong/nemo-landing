@@ -77,7 +77,7 @@ const faqs = [
   { q: "Какие протоколы поддерживаются?", a: "VLESS, VLESS-Reality, XTLS-Vision. Reality — самый стелс-протокол: маскирует трафик под легитимный TLS-handshake популярных сайтов." },
   { q: "Можно ли вернуть деньги?", a: "Да, в течение 7 дней с момента оплаты — без вопросов. Напишите в Telegram-бот /refund." },
   { q: "Есть ли лог-политика?", a: "Zero-logs. Мы не пишем ни IP, ни DNS-запросы, ни время сессий. Технически логи отключены на уровне Xray-конфигов." },
-  { q: "Что такое скидка 50% для мигрантов?", a: "Если у вас есть активная подписка на другой VPN — мы даём 50% скидку на аналогичный период. Платили за 1 месяц — получите 1 месяц за полцены. За год — год за полцены. Просто покажите скриншот оплаты в боте." },
+  { q: "Как получить скидку 50%?", a: "Если у вас есть активная платная подписка на другой VPN — мы даём 50% скидку на аналогичный период. Платили за 1 месяц — получите 1 месяц за полцены. За год — год за полцены. Просто покажите скриншот оплаты или загрузите подтверждение в боте. Проверка занимает 2 минуты." },
   { q: "Что такое VIP тариф?", a: "VIP тариф (300₽/мес) — это обход белых списков платформ. Если Wildberries, Ozon или банк блокируют вас через VPN — VIP решает эту проблему через резидентные IP и продвинутую маршрутизацию. Включает лимит трафика: 100 ГБ на месяц, 350 ГБ на 3 месяца, 800 ГБ на 6 месяцев, 2048 ГБ на год. Можно докупать: 50 ГБ за 100₽, 100 ГБ за 200₽." },
   { q: "Сколько трафика на стандартном тарифе?", a: "Стандартный тариф (100₽/мес) — это полный безлимит. Никаких ограничений по трафику. Серфите, смотрите видео, скачивайте — без счётчика." },
 ];
@@ -143,7 +143,7 @@ export default function Home() {
           <div className="flex items-center gap-3">
             <span className="hidden lg:block text-[10px] text-primary font-mono">NODE: RU-MOS-01 // 99.94%</span>
             <a href="#pricing" className="px-3 py-2 bg-primary text-primary-foreground text-[11px] font-bold uppercase tracking-widest hover:translate-x-0.5 hover:translate-y-0.5 transition-transform">
-              Acquire
+              Тарифы
             </a>
           </div>
         </div>
@@ -156,9 +156,9 @@ export default function Home() {
           <div className="lg:col-span-8 flex flex-col justify-center">
             <div className="inline-flex w-fit items-center gap-2 mb-6 px-3 py-1 border border-border text-[10px] font-bold tracking-widest uppercase text-primary">
               <span className="size-1.5 bg-primary animate-blink" />
-              Stealth Build v1.0.42 / VLESS Reality
+              Сборка v1.0.42 / VLESS Reality
             </div>
-            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl xl:text-8xl uppercase leading-[0.88] tracking-tighter text-foreground glitch" data-text="Broadcast from the Underground.">
+            <h1 className="font-display text-5xl sm:text-6xl md:text-7xl xl:text-8xl uppercase leading-[0.88] tracking-tighter text-foreground">
               Свобода начинается <span className="text-primary">здесь</span>.
             </h1>
             <p className="mt-8 max-w-[54ch] text-base sm:text-lg text-muted-foreground leading-relaxed">
@@ -172,7 +172,7 @@ export default function Home() {
                 Инструкции
               </a>
               <div className="px-5 py-3 border border-border flex flex-col justify-center">
-                <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Current price</span>
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Цена</span>
                 <span className="font-bold tabular-nums text-foreground">от 100 ₽ / мес</span>
               </div>
             </div>
@@ -182,7 +182,7 @@ export default function Home() {
               <span>✓ Ключ маршрутизации</span>
               <span>✓ Per-App VPN iOS</span>
               <span>✓ Telegram Mini-App</span>
-              <span>✓ Скидка 50% мигрантам</span>
+              <span>✓ −50% при переходе от конкурента</span>
             </div>
           </div>
           <aside className="lg:col-span-4 border border-border bg-surface p-3 relative">
@@ -231,7 +231,7 @@ export default function Home() {
       <section id="manifesto" className="px-4 sm:px-6 py-24 sm:py-32 relative">
         <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
           <div className="lg:col-span-7">
-            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Manifesto</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Манифест</span>
             <h2 className="mt-6 font-display text-4xl sm:text-5xl md:text-6xl uppercase leading-[0.95] tracking-tighter text-foreground">
               Интернет должен быть <span className="text-primary italic">свободным</span>. <br />
               Мы делаем его таким снова.
@@ -251,10 +251,10 @@ export default function Home() {
           </div>
           <div className="lg:col-span-5 grid grid-cols-2 gap-px bg-border border border-border">
             {[
-              { k: "DPI", v: "Bypass" },
-              { k: "RKN", v: "Override" },
-              { k: "Whitelist", v: "Cracked" },
-              { k: "Logs", v: "Zero" },
+              { k: "DPI", v: "Обход" },
+              { k: "РКН", v: "Непобедим" },
+              { k: "Белые списки", v: "Взломаны" },
+              { k: "Логи", v: "Ноль" },
             ].map(p => (
               <div key={p.k} className="bg-background p-8 group hover:bg-surface transition-colors">
                 <div className="text-[11px] uppercase tracking-widest text-muted-foreground mb-3">// {p.k}</div>
@@ -268,9 +268,9 @@ export default function Home() {
       {/* ═══ HOW IT WORKS ═══ */}
       <section id="protocol" className="border-y border-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 flex items-baseline gap-4">
-          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Protocol Sequence</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Как это работает</span>
           <div className="h-px grow bg-border" />
-          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">03 Steps</span>
+          <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-muted-foreground">3 шага</span>
         </div>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 border-t border-l border-border">
           {[
@@ -290,13 +290,31 @@ export default function Home() {
       {/* ═══ PRICING ═══ */}
       <section id="pricing" className="bg-surface border-y border-border px-4 sm:px-6 py-24">
         <div className="max-w-7xl mx-auto">
+
+          {/* 50% Promo Banner — FIRST thing visible */}
+          <div className="mb-16 border-2 border-primary neon-border p-8 md:p-10 text-center max-w-3xl mx-auto">
+            <div className="inline-block bg-primary text-primary-foreground px-4 py-1 text-lg font-bold uppercase tracking-widest mb-4">
+              −50%
+            </div>
+            <h3 className="font-display text-2xl sm:text-3xl uppercase tracking-tighter text-foreground mb-3">
+              Уже есть VPN? Переходи за полцены
+            </h3>
+            <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed">
+              Покажите действующую платную подписку на любой VPN — и получите NEMO со скидкой 50% на такой же срок.
+              Месяц у конкурента = месяц NEMO за полцены. Год = год за полцены.
+            </p>
+            <p className="text-primary text-sm mt-4 font-bold uppercase tracking-widest">
+              Скриншот → AI-проверка → 2 минуты → готово
+            </p>
+          </div>
+
           <div className="text-center mb-16">
-            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Select Tier</span>
+            <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Тарифы</span>
             <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter">
               Выберите режим доступа
             </h2>
             <p className="mt-4 text-muted-foreground text-sm max-w-md mx-auto">
-              Универсальный доступ ко всем нодам и протоколам. Оплата МИР / СБП / ЮMoney / крипта.
+              Универсальный доступ ко всем нодам и протоколам. Оплата МИР / СБП / крипта.
             </p>
           </div>
 
@@ -335,7 +353,7 @@ export default function Home() {
               >
                 {t.highlight && (
                   <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-primary text-primary-foreground px-3 py-0.5 text-[10px] font-bold uppercase tracking-widest">
-                    Popular
+                    Популярный
                   </div>
                 )}
                 <div className="text-[11px] text-muted-foreground uppercase tracking-widest mb-3">{t.label}</div>
@@ -355,11 +373,11 @@ export default function Home() {
                   </li>
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
-                    <span>{activeTab === "standard" ? "50 ГБ / мес" : "Безлимит"}</span>
+                    <span>{activeTab === "standard" ? "Безлимит" : "100 ГБ / мес"}</span>
                   </li>
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
-                    <span>{activeTab === "standard" ? "3 устройства" : "10 устройств"}</span>
+                    <span>{activeTab === "standard" ? "Без device tracking" : "Device tracking"}</span>
                   </li>
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
@@ -394,8 +412,8 @@ export default function Home() {
           {/* Discount banner with interactive toggle */}
           <div className="mt-10 border border-primary/30 bg-background p-6 max-w-2xl mx-auto neon-border">
             <div className="flex items-center gap-3 mb-4">
-              <span className="bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">50% скидка</span>
-              <span className="text-sm text-muted-foreground">Для мигрантов с другого VPN</span>
+              <span className="bg-primary text-primary-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest">−50%</span>
+              <span className="text-sm text-muted-foreground">При переходе от другого VPN</span>
             </div>
             <div className="flex items-center gap-4 mb-4">
               <label className="flex items-center gap-3 cursor-pointer">
@@ -578,7 +596,7 @@ route = vpn  # всё остальное через VPN`}</pre>
         <div className="max-w-7xl mx-auto">
           <div className="flex items-end justify-between flex-wrap gap-6 mb-12">
             <div>
-              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Setup Manuals</span>
+              <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Инструкции</span>
               <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter max-w-3xl">
                 Инструкции
               </h2>
@@ -680,7 +698,7 @@ route = vpn  # всё остальное через VPN`}</pre>
               Nemo<span className="text-primary">.</span>VPN
             </div>
             <div className="mt-2 text-[10px] text-muted-foreground uppercase tracking-[0.2em]">
-              Est. 2024 / Built for the Blackout
+              Основан 2024 / Создано для свободы
             </div>
             <p className="mt-6 text-sm text-muted-foreground max-w-sm">
               Stealth-туннель для тех, кому нужен интернет без границ. Без логов, без рекламы, без компромиссов.
@@ -701,12 +719,12 @@ route = vpn  # всё остальное через VPN`}</pre>
             </ul>
           </div>
           <div className="md:col-span-2 text-right">
-            <div className="text-[10px] text-primary font-mono">SIGNAL_STRENGTH_100%</div>
-            <div className="text-[10px] text-muted-foreground font-mono mt-1">STAY_INVISIBLE</div>
+            <div className="text-[10px] text-primary font-mono">СИГНАЛ_100%</div>
+            <div className="text-[10px] text-muted-foreground font-mono mt-1">БЕЗ_СЛЕДОВ</div>
           </div>
         </div>
         <div className="max-w-7xl mx-auto mt-12 pt-6 border-t border-border flex flex-col md:flex-row justify-between gap-3 text-[10px] uppercase tracking-widest text-muted-foreground">
-          <div>© 2024–2026 NEMO Networks // No logs · No trace · No surrender</div>
+          <div>© 2024–2026 NEMO Networks // Без логов · Без следов · Без компромиссов</div>
         </div>
       </footer>
     </div>
