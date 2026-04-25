@@ -60,26 +60,26 @@ const logLines = [
 ];
 
 const guides = [
-  { tag: "iOS", title: "Streisand + Per-App VPN автоматизация", duration: "06:24", type: "ВИДЕО" },
-  { tag: "Android", title: "v2rayNG: импорт ключа за 60 секунд", duration: "03:12", type: "ВИДЕО" },
-  { tag: "macOS", title: "FoXray и системный routing", duration: "08:40", type: "ВИДЕО" },
-  { tag: "Windows", title: "Hiddify Next: TUN-режим", duration: "05:15", type: "ВИДЕО" },
-  { tag: "iOS PRO", title: "Per-App VPN: авто on/off по приложениям", duration: "10 шагов", type: "ДОКУМЕНТ" },
-  { tag: "Router", title: "Keenetic / OpenWRT через Xray", duration: "12 страниц", type: "PDF" },
+  { tag: "iOS", title: "Happ: импорт ключа и Per-App VPN", duration: "02:30", type: "ВИДЕО" },
+  { tag: "Android", title: "Happ: настройка за 60 секунд", duration: "01:45", type: "ВИДЕО" },
+  { tag: "macOS", title: "Happ на macOS — подключение", duration: "02:00", type: "ВИДЕО" },
+  { tag: "Windows", title: "Happ на Windows — первый запуск", duration: "02:15", type: "ВИДЕО" },
+  { tag: "Linux", title: "Happ на Linux — установка", duration: "03:00", type: "ВИДЕО" },
+  { tag: "iOS PRO", title: "Быстрые команды: авто on/off VPN", duration: "10 шагов", type: "ДОКУМЕНТ" },
 ];
 
 const faqs = [
   { q: "Это законно?", a: "Использование VPN в России законно для физических лиц. Запрещена только публичная реклама обхода блокировок и использование VPN для доступа к экстремистскому контенту. NEMO не хранит логи и не несёт ответственности за то, к каким ресурсам вы подключаетесь." },
-  { q: "Что приходит на email после оплаты?", a: "Два артефакта: (1) subscription URL — ссылка на персональный конфиг, которая автоматически подхватывает новые сервера, и (2) routing-ключ для VLESS/Reality, который импортируется в любой совместимый клиент: Hiddify, v2rayNG, Streisand, FoXray." },
+  { q: "Что приходит на email после оплаты?", a: "Два артефакта: (1) VPN-ключ — подключает зашифрованный туннель через VLESS Reality, и (2) ключ маршрутизации — направляет российские сайты напрямую, а заблокированные через VPN. Оба ключа импортируются в Happ одним нажатием." },
   { q: "Работает ли с банковскими приложениями?", a: "Да. Через Per-App VPN на iOS и split tunneling на Android туннель автоматически отключается при открытии RU-приложений из whitelist и снова поднимается для заблокированных сервисов. Никаких ручных переключателей." },
   { q: "Что если ноду заблокируют?", a: "Подписка автоматически переключится на резервный сервер. Subscription URL обновляется на лету — никаких действий от вас не требуется. У нас всегда 5+ свежих нод в ротации." },
-  { q: "Сколько устройств можно подключить?", a: "На стандартном тарифе — до 3 устройств, на VIP — до 10. Можно настроить на iPhone, Mac, Windows, Android и роутере одновременно." },
+  { q: "Сколько устройств можно подключить?", a: "На стандартном тарифе — без device tracking, подключайте сколько нужно. На VIP — device tracking активирован для защиты от расшаривания аккаунта." },
   { q: "Какие протоколы поддерживаются?", a: "VLESS, VLESS-Reality, XTLS-Vision. Reality — самый стелс-протокол: маскирует трафик под легитимный TLS-handshake популярных сайтов." },
   { q: "Можно ли вернуть деньги?", a: "Да, в течение 7 дней с момента оплаты — без вопросов. Напишите в Telegram-бот /refund." },
   { q: "Есть ли лог-политика?", a: "Zero-logs. Мы не пишем ни IP, ни DNS-запросы, ни время сессий. Технически логи отключены на уровне Xray-конфигов." },
   { q: "Что такое скидка 50% для мигрантов?", a: "Если у вас есть активная подписка на другой VPN — мы даём 50% скидку на аналогичный период. Платили за 1 месяц — получите 1 месяц за полцены. За год — год за полцены. Просто покажите скриншот оплаты в боте." },
-  { q: "Что такое VIP тариф?", a: "VIP тариф (300₽/мес) — это безлимитный трафик с обходом белых списков платформ. Если Wildberries, Ozon или банк блокируют вас через VPN — VIP решает эту проблему через резидентные IP и продвинутую маршрутизацию. До 10 устройств одновременно." },
-  { q: "Сколько трафика на стандартном тарифе?", a: "Стандартный тариф (100₽/мес) включает 50 ГБ трафика в месяц. Этого достаточно для повседневного использования: сайты, мессенджеры, соцсети, видео. Если нужен безлимит — выбирайте VIP." },
+  { q: "Что такое VIP тариф?", a: "VIP тариф (300₽/мес) — это обход белых списков платформ. Если Wildberries, Ozon или банк блокируют вас через VPN — VIP решает эту проблему через резидентные IP и продвинутую маршрутизацию. Включает лимит трафика: 100 ГБ на месяц, 350 ГБ на 3 месяца, 800 ГБ на 6 месяцев, 2048 ГБ на год. Можно докупать: 50 ГБ за 100₽, 100 ГБ за 200₽." },
+  { q: "Сколько трафика на стандартном тарифе?", a: "Стандартный тариф (100₽/мес) — это полный безлимит. Никаких ограничений по трафику. Серфите, смотрите видео, скачивайте — без счётчика." },
 ];
 
 /* ───── PAGE ───── */
@@ -131,10 +131,10 @@ export default function Home() {
           </a>
           <div className="hidden md:flex gap-7 text-xs uppercase tracking-widest font-bold">
             {[
-              { href: "#manifesto", label: "Manifesto" },
-              { href: "#protocol", label: "Protocol" },
-              { href: "#pricing", label: "Access" },
-              { href: "#setup", label: "Setup" },
+              { href: "#manifesto", label: "Манифест" },
+              { href: "#protocol", label: "Как работает" },
+              { href: "#pricing", label: "Тарифы" },
+              { href: "#setup", label: "Настройка" },
               { href: "#faq", label: "FAQ" },
             ].map(l => (
               <a key={l.href} href={l.href} className="text-muted-foreground hover:text-primary transition-colors">{l.label}</a>
@@ -156,14 +156,13 @@ export default function Home() {
           <div className="lg:col-span-8 flex flex-col justify-center">
             <div className="inline-flex w-fit items-center gap-2 mb-6 px-3 py-1 border border-border text-[10px] font-bold tracking-widest uppercase text-primary">
               <span className="size-1.5 bg-primary animate-blink" />
-              Stealth Build v1.0.42 / AES-256-GCM
+              Stealth Build v1.0.42 / VLESS Reality
             </div>
             <h1 className="font-display text-5xl sm:text-6xl md:text-7xl xl:text-8xl uppercase leading-[0.88] tracking-tighter text-foreground glitch" data-text="Broadcast from the Underground.">
-              Broadcast from <br />the <span className="text-primary">Underground</span>.
+              Свобода начинается <span className="text-primary">здесь</span>.
             </h1>
             <p className="mt-8 max-w-[54ch] text-base sm:text-lg text-muted-foreground leading-relaxed">
-              NEMO VPN — проприетарный stealth-туннель, спроектированный для обхода блокировок Роскомнадзора,
-              DPI-фильтрации и whitelist-сетей. Без логов. Без следов. Только чистый транзит.
+              NEMO VPN — VPN-сервис с ключом маршрутизации. Заблокированные сайты через VPN, российские — напрямую. VLESS Reality, без логов, без следов.
             </p>
             <div className="mt-10 flex flex-wrap gap-4 items-stretch">
               <a href="#pricing" className="bg-primary text-primary-foreground px-7 py-4 font-bold uppercase tracking-widest text-sm nemo-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
@@ -180,6 +179,7 @@ export default function Home() {
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-[11px] uppercase tracking-widest text-muted-foreground">
               <span>✓ No logs</span>
               <span>✓ VLESS / Reality</span>
+              <span>✓ Ключ маршрутизации</span>
               <span>✓ Per-App VPN iOS</span>
               <span>✓ Telegram Mini-App</span>
               <span>✓ Скидка 50% мигрантам</span>
@@ -213,14 +213,14 @@ export default function Home() {
           <div className="flex gap-12 animate-marquee whitespace-nowrap text-[11px] uppercase tracking-[0.3em] text-muted-foreground">
             {[...Array(4)].map((_, k) => (
               <div key={k} className="flex gap-12 shrink-0">
-                <span>★ Bypass Roskomnadzor</span>
-                <span>★ Whitelist Override</span>
-                <span>★ Reality Protocol</span>
-                <span>★ Zero Logs Policy</span>
-                <span>★ Per-App VPN iOS</span>
+                <span>★ Обход РКН</span>
+                <span>★ Обход белых списков</span>
+                <span>★ VLESS Reality</span>
+                <span>★ Без логов</span>
+                <span>★ Per-App VPN</span>
                 <span>★ Telegram Mini-App</span>
-                <span>★ Anonymous Pay</span>
-                <span>★ 99.94% Uptime</span>
+                <span>★ Анонимная оплата</span>
+                <span>★ 99.94% Аптайм</span>
               </div>
             ))}
           </div>
@@ -274,9 +274,9 @@ export default function Home() {
         </div>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 border-t border-l border-border">
           {[
-            { n: "01", title: "Anonymous Pay", body: "Оплата картой МИР, СБП, ЮMoney или криптой через защищённый чекаут. Никакой регистрации — только email для доставки ключей. Telegram Stars тоже доступен.", highlight: false },
-            { n: "02", title: "Dual Key Delivery", body: "Мгновенно на email прилетают: subscription URL (автообновление серверов) и routing-ключ для VLESS/Reality. Также доступны прямо в Telegram-боте.", highlight: true },
-            { n: "03", title: "One-Tap Deploy", body: "Импорт ключей в Streisand, v2rayNG, FoXray или Hiddify. Per-App VPN на iOS автоматически включает туннель только для заблокированных приложений.", highlight: false },
+            { n: "01", title: "Оплата", body: "Карта МИР, СБП или крипта через защищённый чекаут. Нужен только email для доставки ключей. Никакой регистрации.", highlight: false },
+            { n: "02", title: "Два ключа", body: "На email и в Telegram мгновенно приходят: VPN-ключ + ключ маршрутизации. VPN-ключ подключает туннель, ключ маршрутизации направляет РУ-сайты напрямую, а заблокированные — через VPN.", highlight: true },
+            { n: "03", title: "Happ — один клиент", body: "Единственное приложение — Happ. Работает на iOS, Android, macOS, Windows, Linux. Импорт ключа — один клик. Per-App VPN на iOS автоматически включает туннель только для заблокированных.", highlight: false },
           ].map(s => (
             <article key={s.n} className={`p-10 lg:p-12 border-r border-b border-border ${s.highlight ? "bg-primary text-primary-foreground" : "bg-background"}`}>
               <div className={`font-display text-5xl italic mb-6 ${s.highlight ? "text-primary-foreground" : "text-primary"}`}>{s.n}</div>
@@ -452,7 +452,7 @@ export default function Home() {
                 "Не садит батарею — туннель активен только для нужных приложений",
                 "Банки и маркетплейсы видят российский IP — никаких блокировок",
                 "Работает с iOS 16+, iPadOS, macOS Sonoma",
-                "Настраивается за 2 минуты через Streisand или V2Box",
+                "Настраивается за 2 минуты через Happ",
               ].map(b => (
                 <li key={b} className="flex gap-4 items-start">
                   <span className="mt-2 size-1.5 bg-primary shrink-0" />
@@ -470,7 +470,7 @@ export default function Home() {
                 <span className="text-primary animate-blink">● ACTIVE</span>
               </div>
               <pre className="text-[11px] text-muted-foreground leading-relaxed whitespace-pre-wrap">{`# NEMO Per-App VPN Configuration
-# iOS Settings → VPN → Streisand → (i)
+# iOS Settings → VPN → Happ → Настройки
 
 [vpn-apps]
 # Через VPN (заблокированные):
@@ -605,13 +605,13 @@ route = vpn  # всё остальное через VPN`}</pre>
           <div className="mt-16 max-w-3xl mx-auto space-y-6">
             <h3 className="font-display text-2xl uppercase tracking-tighter text-foreground mb-8">Подробные инструкции</h3>
 
-            <Accordion title={{ num: "01", text: "iOS / iPadOS — Per-App VPN" }} defaultOpen>
+            <Accordion title={{ num: "01", text: "iOS / iPadOS — Happ + Per-App VPN" }} defaultOpen>
               <div className="space-y-3">
                 <p><strong className="text-foreground">Автоматическое переключение VPN для российских и заблокированных сервисов.</strong></p>
-                <CopyBlock text="Скачать Streisand (TestFlight) → Открыть ссылку-ключ из бота → Настроить Per-App VPN" />
+                <CopyBlock text="Скачать Happ (App Store) → Импортировать VPN-ключ из бота → Настроить Per-App VPN" />
                 <p className="text-sm mt-3"><strong className="text-primary">Per-App VPN настройка:</strong></p>
                 <ol className="list-decimal pl-5 space-y-1 text-sm">
-                  <li>Настройки → VPN → Streisand → нажмите (i)</li>
+                  <li>Настройки → VPN → Happ → Настройки маршрутизации</li>
                   <li>«Использовать VPN для» → выберите приложения</li>
                   <li>Instagram, YouTube, ChatGPT — через VPN</li>
                   <li>Сбер, ВТБ, Госуслуги, Wildberries — напрямую</li>
@@ -620,18 +620,18 @@ route = vpn  # всё остальное через VPN`}</pre>
               </div>
             </Accordion>
 
-            <Accordion title={{ num: "02", text: "Android — v2rayNG / NekoBox" }}>
+            <Accordion title={{ num: "02", text: "Android — Happ" }}>
               <div className="space-y-3">
-                <p>VLESS Reality + автоматическая маршрутизация через v2rayNG или NekoBox.</p>
-                <CopyBlock text="Скачать v2rayNG → Скопировать ссылку-ключ из бота → Импорт из буфера → Подключиться" />
-                <p className="text-xs text-muted-foreground mt-2">Split tunneling: Настройки → Apps → выберите, какие приложения через VPN</p>
+                <p>Простой и быстрый VPN-клиент Happ для Android.</p>
+                <CopyBlock text="Скачать Happ (Google Play) → Импортировать ключ → Подключиться" />
+                <p className="text-xs text-muted-foreground mt-2">Split tunneling доступен в настройках приложения</p>
               </div>
             </Accordion>
 
-            <Accordion title={{ num: "03", text: "macOS / Windows — FoXray / Hiddify" }}>
+            <Accordion title={{ num: "03", text: "macOS / Windows / Linux — Happ" }}>
               <div className="space-y-3">
-                <p>Используйте Hiddify Next (Windows/macOS) или FoXray (macOS).</p>
-                <CopyBlock text="Скопировать ссылку-ключ из бота → Импорт в клиент → Подключиться" />
+                <p>Универсальный клиент Happ для всех десктопных платформ.</p>
+                <CopyBlock text="Скачать Happ для вашей платформы → Импортировать ключ → Подключиться" />
               </div>
             </Accordion>
 
