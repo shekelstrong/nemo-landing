@@ -1,5 +1,14 @@
 # NEMO VPN Landing
 
+<div align="center">
+
+[![GitHub stars](https://img.shields.io/github/stars/shekelstrong/nemo-landing?style=for-the-badge&color=yellow)](https://github.com/shekelstrong/nemo-landing/stargazers)
+[![Live](https://img.shields.io/badge/Live-nemo--landing.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://nemo-landing.vercel.app)
+[![Discussions](https://img.shields.io/github/discussions/shekelstrong/nemo-landing?style=for-the-badge&color=58A6FF)](https://github.com/shekelstrong/nemo-landing/discussions)
+
+</div>
+
+
 One-page site for selling VPN subscriptions. Dark theme, VLESS Reality branding.
 
 ## Quick Start
