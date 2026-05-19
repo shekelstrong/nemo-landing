@@ -343,3 +343,40 @@
   border-bottom: 1px solid hsl(var(--border));
   color: hsl(var(--muted-foreground));
 }
+
+/* Subscription page styles */
+.copy-btn {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-family: 'Syne', sans-serif;
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  border: none;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 3px 3px 0px 0px hsl(var(--primary));
+}
+.copy-btn:hover {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+.copy-btn:active {
+  transform: translate(3px, 3px);
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
