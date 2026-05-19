@@ -33,21 +33,29 @@ function CopyBlock({ text }) {
 
 /* ───── DATA ───── */
 
-// Тарифы из vpn_bot/config.py: базовая цена 100₽/мес, VIP 300₽/мес
-// Скидки: 3м=10%, 6м=17%, 12м=25%
-// Скидка 50% для тех, у кого уже есть платный VPN
-const standardTiers = [
-  { months: 1, label: "1 месяц", price: 100, monthly: 100 },
-  { months: 3, label: "3 месяца", price: 270, monthly: 90, discount: "10%", highlight: false },
-  { months: 6, label: "6 месяцев", price: 498, monthly: 83, discount: "17%", highlight: true },
-  { months: 12, label: "1 год", price: 900, monthly: 75, discount: "25%", highlight: false },
+// Единая подписка: оба конфига (стандартный безлимит + обход БС с GB-лимитом)
+const tiers = [
+  { days: 3, label: "3 дня", price: 200, gb: 10 },
+  { months: 1, label: "1 месяц", price: 500, gb: 100, monthly: 500 },
+  { months: 3, label: "3 месяца", price: 1500, gb: 350, monthly: 500 },
+  { months: 6, label: "6 месяцев", price: 2500, gb: 800, monthly: 417, highlight: true },
+  { months: 12, label: "1 год", price: 4500, gb: 2048, monthly: 375 },
 ];
 
-const premiumTiers = [
-  { months: 1, label: "1 месяц", price: 300, monthly: 300 },
-  { months: 3, label: "3 месяца", price: 810, monthly: 270, discount: "10%" },
-  { months: 6, label: "6 месяцев", price: 1494, monthly: 249, discount: "17%" },
-  { months: 12, label: "1 год", price: 2700, monthly: 225, discount: "25%" },
+// Подарочные цены
+const giftPrices = [
+  { months: 1, label: "1 месяц", price: 700 },
+  { months: 3, label: "3 месяца", price: 1800 },
+  { months: 6, label: "6 месяцев", price: 3000 },
+  { months: 12, label: "1 год", price: 5500 },
+];
+
+// Докупка трафика
+const trafficTopUps = [
+  { gb: 50, price: 200 },
+  { gb: 100, price: 400 },
+  { gb: 300, price: 1000 },
+  { gb: 500, price: 2000 },
 ];
 
 const logLines = [
@@ -70,16 +78,14 @@ const guides = [
 
 const faqs = [
   { q: "Это законно?", a: "Использование VPN в России законно для физических лиц. Запрещена только публичная реклама обхода блокировок и использование VPN для доступа к экстремистскому контенту. NEMO не хранит логи и не несёт ответственности за то, к каким ресурсам вы подключаетесь." },
-  { q: "Что приходит на email после оплаты?", a: "Два артефакта: (1) VPN-ключ — подключает зашифрованный туннель через VLESS Reality, и (2) ключ маршрутизации — направляет российские сайты напрямую, а заблокированные через VPN. Оба ключа импортируются в Happ одним нажатием." },
+  { q: "Что входит в подписку?", a: "Одна подписка включает оба конфига: стандартный (безлимит) и обход белых списков (с GB-лимитом по тарифу). Не нужно выбирать — вы получаете всё сразу." },
   { q: "Работает ли с банковскими приложениями?", a: "Да. Через Per-App VPN на iOS и split tunneling на Android туннель автоматически отключается при открытии RU-приложений из whitelist и снова поднимается для заблокированных сервисов. Никаких ручных переключателей." },
   { q: "Что если ноду заблокируют?", a: "Подписка автоматически переключится на резервный сервер. Subscription URL обновляется на лету — никаких действий от вас не требуется. У нас всегда 5+ свежих нод в ротации." },
-  { q: "Сколько устройств можно подключить?", a: "На стандартном тарифе — без device tracking, подключайте сколько нужно. На VIP — device tracking активирован для защиты от расшаривания аккаунта." },
+  { q: "Сколько устройств можно подключить?", a: "Подключайте столько устройств, сколько нужно. Device tracking не используется — мы не ограничиваем количество подключений." },
   { q: "Какие протоколы поддерживаются?", a: "VLESS, VLESS-Reality, XTLS-Vision. Reality — самый стелс-протокол: маскирует трафик под легитимный TLS-handshake популярных сайтов." },
-
   { q: "Есть ли лог-политика?", a: "Zero-logs. Мы не пишем ни IP, ни DNS-запросы, ни время сессий. Технически логи отключены на уровне Xray-конфигов." },
   { q: "Как получить скидку 50%?", a: "Если у вас уже есть платный VPN — покажите скриншот оплаты в боте и получите 50% скидку на аналогичный период. Платили за 1 месяц — получите 1 месяц за полцены. За год — год за полцены." },
-  { q: "Что такое VIP тариф?", a: "VIP тариф (300₽/мес) — это обход белых списков платформ. Если Wildberries, Ozon или банк блокируют вас через VPN — VIP решает эту проблему через резидентные IP и продвинутую маршрутизацию. Включает лимит трафика: 100 ГБ на месяц, 350 ГБ на 3 месяца, 800 ГБ на 6 месяцев, 2048 ГБ на год. Можно докупать: 50 ГБ за 100₽, 100 ГБ за 200₽." },
-  { q: "Сколько трафика на стандартном тарифе?", a: "Стандартный тариф (100₽/мес) — это полный безлимит. Никаких ограничений по трафику. Серфите, смотрите видео, скачивайте — без счётчика." },
+  { q: "Можно ли докупить трафик?", a: "Да, если лимит GB по тарифу закончился: 50 ГБ за 200₽, 100 ГБ за 400₽, 300 ГБ за 1000₽, 500 ГБ за 2000₽. Стандартный конфиг всегда безлимитный — лимит только на обход белых списков." },
 ];
 
 /* ───── PAGE ───── */
@@ -89,7 +95,6 @@ export default function Home() {
   const [showDiscount, setShowDiscount] = useState(false);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [activeTab, setActiveTab] = useState("standard");
 
   useEffect(() => {
     let i = 0;
@@ -107,9 +112,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const tiers = activeTab === "standard" ? standardTiers : premiumTiers;
   const currentTier = tiers[selectedTier] || tiers[0];
-  const discountPrice = showDiscount ? Math.round(currentTier.price / 2) : null;
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -169,15 +172,12 @@ export default function Home() {
               <a href="#pricing" className="bg-primary text-primary-foreground px-7 py-4 font-bold uppercase tracking-widest text-sm nemo-shadow-sm hover:translate-x-1 hover:translate-y-1 hover:shadow-none transition-all">
                 Получить доступ
               </a>
-              <a href="#discount" className="px-7 py-4 border-2 border-red-500 text-red-500 font-bold uppercase tracking-widest text-sm animate-red-blink hover:bg-red-500 hover:text-white transition-all">
-                VPN за полцены
-              </a>
               <a href="#setup" className="px-7 py-4 border border-border text-foreground font-bold uppercase tracking-widest text-sm hover:border-primary hover:text-primary transition-colors">
                 Инструкции
               </a>
               <div className="px-5 py-3 border border-border flex flex-col justify-center">
                 <span className="text-[10px] text-muted-foreground uppercase tracking-widest">Цена</span>
-                <span className="font-bold tabular-nums text-foreground">от 100 ₽ / мес</span>
+                <span className="font-bold tabular-nums text-foreground">от 500 ₽ / мес</span>
               </div>
             </div>
             <div className="mt-10 flex flex-wrap gap-x-8 gap-y-3 text-[11px] uppercase tracking-widest text-muted-foreground">
@@ -186,7 +186,7 @@ export default function Home() {
               <span>✓ Ключ маршрутизации</span>
               <span>✓ Per-App VPN iOS</span>
               <span>✓ Telegram Mini-App</span>
-              <span>✓ −50% если есть платный VPN</span>
+              <span>✓ Оба конфига включены</span>
             </div>
           </div>
           <aside className="lg:col-span-4 border border-border bg-surface p-3 relative">
@@ -280,8 +280,8 @@ export default function Home() {
         </div>
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 border-t border-l border-border">
           {[
-            { n: "01", title: "Оплата", body: "Карта МИР, СБП или крипта через защищённый чекаут. Нужен только email для доставки ключей. Никакой регистрации.", highlight: false },
-            { n: "02", title: "Два ключа", body: "На email и в Telegram мгновенно приходят: VPN-ключ + ключ маршрутизации. VPN-ключ подключает туннель, ключ маршрутизации направляет РУ-сайты напрямую, а заблокированные — через VPN.", highlight: true },
+            { n: "01", title: "Оплата", body: "Карта МИР, СБП или крипта через защищённый чекаут. Никакой регистрации — только Telegram-аккаунт.", highlight: false },
+            { n: "02", title: "Два конфига", body: "В Telegram мгновенно приходят: стандартный конфиг (безлимит) + конфиг обхода белых списков (с GB-лимитом). Оба импортируются в Happ одним нажатием.", highlight: true },
             { n: "03", title: "Happ — один клиент", body: "Единственное приложение — Happ. Работает на iOS, Android, macOS, Windows, Linux. Импорт ключа — один клик. Per-App VPN на iOS автоматически включает туннель только для заблокированных.", highlight: false },
           ].map(s => (
             <article key={s.n} className={`p-10 lg:p-12 border-r border-b border-border ${s.highlight ? "bg-primary text-primary-foreground" : "bg-background"}`}>
@@ -317,37 +317,17 @@ export default function Home() {
           <div className="text-center mb-16">
             <span className="font-mono text-[11px] uppercase tracking-[0.3em] text-primary">/ Тарифы</span>
             <h2 className="mt-4 font-display text-4xl sm:text-5xl md:text-6xl uppercase tracking-tighter">
-              Выберите режим доступа
+              Одна подписка — оба конфига
             </h2>
             <p className="mt-4 text-muted-foreground text-sm max-w-md mx-auto">
-              Универсальный доступ ко всем нодам и протоколам. Оплата МИР / СБП / крипта.
+              Универсальный доступ: стандартный (безлимит) + обход белых списков (с GB-лимитом). Оплата МИР / СБП / крипта.
             </p>
           </div>
 
-          {/* Tab switcher */}
-          <div className="flex justify-center gap-2 mb-10">
-            {[
-              { id: "standard", label: "Стандарт" },
-              { id: "premium", label: "VIP (Обход белых списков)" },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => { setActiveTab(tab.id); setSelectedTier(0); }}
-                className={`px-4 py-2 text-xs uppercase tracking-widest font-bold transition-all ${
-                  activeTab === tab.id
-                    ? "bg-primary text-primary-foreground"
-                    : "border border-border text-muted-foreground hover:border-primary hover:text-primary"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
             {tiers.map((t, i) => (
               <button
-                key={t.months}
+                key={t.label}
                 onClick={() => setSelectedTier(i)}
                 className={`relative p-8 flex flex-col text-left transition-all neon-border ${
                   selectedTier === i
@@ -363,15 +343,18 @@ export default function Home() {
                   </div>
                 )}
                 <div className="text-[11px] text-muted-foreground uppercase tracking-widest mb-3">{t.label}</div>
-                {t.discount && (
-                  <div className="text-[10px] text-primary font-bold uppercase mb-2">Скидка {t.discount}</div>
-                )}
                 <div className="flex items-baseline gap-2 mb-2">
                   <span className="text-4xl font-display font-bold tabular-nums text-foreground">
                     {t.price}<span className="text-lg text-muted-foreground"> ₽</span>
                   </span>
                 </div>
-                <div className="text-xs text-muted-foreground mb-6">{t.monthly} ₽ / мес</div>
+                <div className="text-xs text-muted-foreground mb-1">
+                  {t.gb >= 1024 ? `${t.gb / 1024} ТБ` : `${t.gb} ГБ`} на обход БС
+                </div>
+                {t.monthly && (
+                  <div className="text-xs text-muted-foreground mb-6">{t.monthly} ₽ / мес</div>
+                )}
+                {!t.monthly && <div className="mb-6" />}
                 <ul className="space-y-3 mb-8 text-sm">
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
@@ -379,22 +362,16 @@ export default function Home() {
                   </li>
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
-                    <span>{activeTab === "standard" ? "Безлимит" : "100 ГБ / мес"}</span>
+                    <span>Стандартный — безлимит</span>
                   </li>
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
-                    <span>{activeTab === "standard" ? "Без device tracking" : "Device tracking"}</span>
+                    <span>Обход белых списков</span>
                   </li>
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
-                    <span>{activeTab === "standard" ? "Все ноды" : "Все ноды + резидентные IP"}</span>
+                    <span>Все ноды + резидентные IP</span>
                   </li>
-                  {activeTab === "premium" && (
-                    <li className="flex items-start gap-3 text-muted-foreground">
-                      <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
-                      <span>Обход белых списков</span>
-                    </li>
-                  )}
                   <li className="flex items-start gap-3 text-muted-foreground">
                     <span className="mt-1.5 size-1.5 bg-primary shrink-0" />
                     <span>Per-App VPN iOS</span>
@@ -439,7 +416,6 @@ export default function Home() {
                   <div className="text-3xl font-display font-bold tabular-nums text-primary">
                     {showDiscount ? Math.round(currentTier.price / 2) : currentTier.price} ₽
                     <span className="text-sm text-muted-foreground ml-2">/ {currentTier.label}</span>
-                    {activeTab === "premium" && " (VIP)"}
                   </div>
                   <a
                     href="https://t.me/nemo_vpn_bot"
@@ -493,7 +469,7 @@ export default function Home() {
           </div>
 
           <p className="mt-10 text-center text-[11px] text-muted-foreground uppercase tracking-widest">
-            После оплаты ключи приходят на email и в Telegram в течение 30 секунд. 24ч бесплатно.
+            После оплаты ключи приходят в Telegram в течение 30 секунд. 24ч бесплатно.
           </p>
         </div>
       </section>
@@ -587,7 +563,7 @@ route = vpn  # всё остальное через VPN`}</pre>
               </div>
               <div className="flex-1 flex flex-col gap-3 py-4 overflow-hidden">
                 <div className="self-start max-w-[80%] bg-surface border border-border px-3 py-2 text-xs">
-                  👋 Привет! Твоя подписка <span className="text-primary">Standard</span> активна до 22.05.2026
+                  👋 Привет! Твоя подписка активна до 22.05.2026
                 </div>
                 <div className="self-end max-w-[80%] bg-primary text-primary-foreground px-3 py-2 text-xs font-bold">/stats</div>
                 <div className="self-start max-w-[85%] bg-surface border border-border px-3 py-2 text-xs space-y-1">
